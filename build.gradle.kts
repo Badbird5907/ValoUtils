@@ -1,7 +1,6 @@
 plugins {
     id("java")
     id("io.freefair.lombok") version "8.1.0"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "dev.badbird"
@@ -26,14 +25,15 @@ tasks.test {
     useJUnitPlatform()
 }
 
-tasks.shadowJar {
-    archiveClassifier.set("")
-    archiveVersion.set("")
-
+tasks.jar {
+    from(configurations.compileClasspath.get().map { if (it.isDirectory()) it else zipTree(it) })
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes["Main-Class"] = "dev.badbird.valoutils.Main"
     }
 }
-tasks.jar {
-    dependsOn(tasks.shadowJar)
+
+tasks.register("run", JavaExec::class) {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("dev.badbird.valoutils.Main")
 }
