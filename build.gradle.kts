@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("io.freefair.lombok") version "8.1.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "dev.badbird"
@@ -23,4 +24,16 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.shadowJar {
+    archiveClassifier.set("")
+    archiveVersion.set("")
+
+    manifest {
+        attributes["Main-Class"] = "dev.badbird.valoutils.Main"
+    }
+}
+tasks.jar {
+    dependsOn(tasks.shadowJar)
 }
