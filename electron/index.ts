@@ -3,6 +3,7 @@ import { join } from "path";
 import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeTheme } from "electron";
 import isDev from "electron-is-dev";
 import { getAccessToken, getRiotClientInfo } from "./util/riot-client";
+import { getEntitlementsToken } from "./util/riot/entitlements";
 
 const height = 800;
 const width = 800;
@@ -33,7 +34,7 @@ function createWindow() {
     window?.loadFile(url);
   }
   // Open the DevTools.
-  window.webContents.openDevTools();
+  // window.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
@@ -72,4 +73,8 @@ ipcMain.on("access_token:get", async (event: IpcMainEvent) => {
 
 ipcMain.on("access_token:refresh", async (event: IpcMainEvent) => {
   event.sender.send("access_token:refresh", JSON.stringify(await getAccessToken(true)));
+});
+
+ipcMain.on("entitlements_token:get", async (event: IpcMainEvent) => {
+  event.sender.send("entitlements_token:get", JSON.stringify(await getEntitlementsToken()));
 });

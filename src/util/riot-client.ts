@@ -34,3 +34,20 @@ export const getAccessToken = async () => {
     }
   })
 }
+
+export const getEntitlementsToken = async () => {
+  return new Promise<string>((resolve, reject) => {
+    if (window.Main) {
+      const listener = (message: string) => {
+        const data: string = JSON.parse(message);
+        console.log(data);
+        resolve(data);
+        window.Main.removeListener("entitlements_token:get", listener);
+      }
+      window.Main.on("entitlements_token:get", listener);
+      window.Main.send("entitlements_token:get");
+    } else {
+      reject("window.Main is not defined");
+    }
+  })
+}
