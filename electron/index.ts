@@ -2,7 +2,7 @@ import { join } from "path";
 
 import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeTheme } from "electron";
 import isDev from "electron-is-dev";
-import { getRiotClientInfo } from "./util/riot-client";
+import { getAccessToken, getRiotClientInfo } from "./util/riot-client";
 
 const height = 800;
 const width = 800;
@@ -61,5 +61,15 @@ app.on("window-all-closed", () => {
 
 // listen the channel `message` and resend the received message to the renderer process
 ipcMain.on("riot_client_info", async (event: IpcMainEvent) => {
-  event.sender.send("riot_client_info", JSON.stringify(await getRiotClientInfo()))
+  console.log("riot_client_info");
+  event.sender.send("riot_client_info", JSON.stringify(await getRiotClientInfo()));
+});
+
+ipcMain.on("access_token:get", async (event: IpcMainEvent) => {
+  console.log("access_token:get");
+  event.sender.send("access_token:get", JSON.stringify(await getAccessToken()));
+});
+
+ipcMain.on("access_token:refresh", async (event: IpcMainEvent) => {
+  event.sender.send("access_token:refresh", JSON.stringify(await getAccessToken(true)));
 });

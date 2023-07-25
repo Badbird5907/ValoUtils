@@ -13,8 +13,8 @@ const api = {
    * so they can interact with the main (electron) side
    * without security problems.
    */
-  send: (channel: string, message: string) => {
-    ipcRenderer.send(channel, message);
+  send: (channel: string, ...message: any) => {
+    ipcRenderer.send(channel, ...message);
   },
   /**
    * Provide an easier way to listen to events
