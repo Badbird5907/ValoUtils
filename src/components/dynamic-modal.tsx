@@ -38,7 +38,7 @@ export const DynamicModalProvider: React.FC<{ children: ReactNode }> = ({ childr
       {modalContent && (
         <Modal isOpen onOpenChange={closeModal}>
           <ModalContent>
-            {(onClose) => (
+            {() => (
               <>
                 <ModalHeader className="flex flex-col gap-1">{modalContent.title}</ModalHeader>
                 <ModalBody>{modalContent.body}</ModalBody>

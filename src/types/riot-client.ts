@@ -6,8 +6,13 @@ export type RiotClientInfo = {
   protocol: string;
 }
 
-export type AccessToken = {
-  expiry: number;
-  scopes: string[];
-  token: string;
-}
+export type TokensResponse = {
+  /** Used as the token in requests */
+  accessToken: string;
+  entitlements: unknown[];
+  issuer: string;
+  /** Player UUID */
+  subject: string;
+  /** Used as the entitlement in requests */
+  token: string; // entitlement token
+};

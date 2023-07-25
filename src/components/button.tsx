@@ -32,7 +32,7 @@ const CustomButton = ({ modalOnError = true, showStatusColor = true, ...props }:
   delete propsCopy.closeModal;
   return (
     <>
-      <NextUIButton color={btnColor === "default" ? "primary" : (btnColor || "primary")} onPress={(e) => {
+      <NextUIButton color={btnColor === "default" ? "primary" : (btnColor || "primary")} onPress={(e: PressEvent) => {
         if (props.onClickLoading) {
           setLoading(true);
           const promise = props.onClickLoading(e);

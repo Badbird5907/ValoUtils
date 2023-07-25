@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React, {Key, useEffect} from "react";
 import { Tab, Tabs } from "@nextui-org/tabs";
 import { Route } from "@/types/router";
 
 type RouterProps = {
   routes: Route[];
 }
-const Router = ({ routes, ...props }: RouterProps) => {
+const Router = ({ routes }: RouterProps) => {
   const [selected, setSelected] = React.useState<number>(0);
   const [body, setBody] = React.useState<React.ReactNode>(routes[0].component);
   useEffect(() => {
@@ -24,7 +24,7 @@ const Router = ({ routes, ...props }: RouterProps) => {
             tab: "max-w-fit px-0 h-12",
             tabContent: "group-data-[selected=true]:text-[#06b6d4]"
           }}
-          onSelectionChange={(key) => {
+          onSelectionChange={(key: Key) => {
             setSelected(key as number);
           }}
         >

@@ -1,41 +1,35 @@
-import react from "@vitejs/plugin-react";
-import { ConfigEnv, UserConfig } from "vite";
-import { join } from "path";
+import {defineConfig} from 'vite'
+import electron from 'vite-plugin-electron'
+import renderer from 'vite-plugin-electron-renderer'
+import react from '@vitejs/plugin-react'
 import tsconfigPaths from "vite-tsconfig-paths";
+import { fileURLToPath } from 'node:url';
 
-const srcRoot = join(__dirname, "src");
+// https://vitejs.dev/config/
+export default defineConfig({
+    plugins: [
+        react(),
+        tsconfigPaths(),
+        electron([
+            {
+                // Main-Process entry file of the Electron App.
+                entry: 'electron/main.ts',
 
-export default ({ command }: ConfigEnv): UserConfig => {
-  const config: UserConfig = {
-    root: srcRoot,
-    plugins: [react(), tsconfigPaths()],
+            },
+            {
+                entry: 'electron/preload.ts',
+                onstart(options) {
+                    // Notify the Renderer-Process to reload the page when the Preload-Scripts build is complete,
+                    // instead of restarting the entire Electron App.
+                    options.reload()
+                },
+
+            },
+        ]),
+        renderer(),
+    ],
     build: {
-      outDir: join(srcRoot, "/out"),
-      emptyOutDir: true,
-      rollupOptions: {}
-    },
-    server: {
-      port: process.env.PORT === undefined ? 3000 : +process.env.PORT,
-      watch: {
-        ignored: [
-          join(srcRoot, "/electron/**/*")
-        ]
-      }
-    },
-    optimizeDeps: {
-      exclude: ["path"]
+        rollupOptions: {
+        }
     }
-  };
-  // DEV
-  if (command === "serve") {
-    return {
-      base: "/",
-      ...config
-    };
-  }
-  // PROD
-  return {
-    base: "./",
-    ...config
-  };
-};
+})

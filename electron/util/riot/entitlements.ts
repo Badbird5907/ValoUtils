@@ -1,10 +1,11 @@
+/*
 import axios from "axios";
 import { getAccessToken } from "../riot-client";
 
 // Create an in-memory cache object
 const cache: any = {};
 
-export const getEntitlementsToken = async (accessToken: string = "", skipCache = false): Promise<string> => {
+export const getEntitlementsToken = async (accessToken = "", skipCache = false): Promise<string> => {
   let token = accessToken;
 
   if (!skipCache && !accessToken) {
@@ -31,3 +32,4 @@ export const getEntitlementsToken = async (accessToken: string = "", skipCache =
 
   return response.data.entitlements_token;
 };
+ */

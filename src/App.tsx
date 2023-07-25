@@ -1,12 +1,11 @@
 import React from "react";
 import CustomButton from "@/components/button";
-import { getAccessToken, getEntitlementsToken, getInfo } from "@/util/riot-client";
-import { AccessToken, RiotClientInfo } from "@/types/riot-client";
+import {getInfo, getTokens} from "@/util/riot-client";
+import {RiotClientInfo, TokensResponse} from "@/types/riot-client";
 
 function App() {
   const [data, setData] = React.useState<RiotClientInfo | null>(null)
-  const [accessToken, setAccessToken] = React.useState<AccessToken | null>(null)
-  const [entitlementsToken, setEntitlementsToken] = React.useState<string | null>(null)
+  const [accessToken, setAccessToken] = React.useState<TokensResponse | null>(null)
   const [time, setTime] = React.useState<number>(0)
   return (
     <>
@@ -35,7 +34,7 @@ function App() {
         )}
       <CustomButton onClickLoading={() => {
         const start = Date.now();
-        return getAccessToken().then((data) => {
+        return getTokens().then((data) => {
           const ms = Date.now() - start;
           setTime(ms);
           setAccessToken(data);
@@ -47,27 +46,8 @@ function App() {
       </CustomButton>
       {accessToken && (
         <div>
-          <p>Access Token: {accessToken.token}</p>
-          <p>Scopes: {accessToken.scopes}</p>
-          <p>Expire: {accessToken.expiry}</p>
-          <p>Took: {time}ms</p>
-        </div>
-      )}
-      <CustomButton onClickLoading={() => {
-        const start = Date.now();
-        return getEntitlementsToken().then((data) => {
-          const ms = Date.now() - start;
-          setTime(ms);
-          setEntitlementsToken(data);
-        }).catch((err) => {
-          console.error(err);
-        });
-      }}>
-        Get Entitlements Token
-      </CustomButton>
-      {entitlementsToken && (
-        <div>
-          <p>Entitlements Token: {entitlementsToken}</p>
+          <p>Access Token: {accessToken.accessToken}</p>
+          <p>Entitlements: {accessToken.token}</p>
           <p>Took: {time}ms</p>
         </div>
       )}
