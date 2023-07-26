@@ -79,7 +79,6 @@ setInterval(async () => {
     try {
         await getUserInfo();
     } catch (error) {
-        console.error(error);
         win?.webContents.send("riot_client:disconnect", (error as any).toString());
     }
 }, 5000)
