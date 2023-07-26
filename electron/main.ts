@@ -1,6 +1,7 @@
 import {app, BrowserWindow, ipcMain, IpcMainEvent} from 'electron'
 import path from 'node:path'
 import {getRiotClientInfo, getTokens} from "./util/riot-client.ts";
+import {getPreferences} from "./util/riot/settings.ts";
 
 // The built directory structure
 //
@@ -57,17 +58,18 @@ app.on('window-all-closed', () => {
 app.whenReady().then(createWindow)
 
 
-
-ipcMain.on("riot_client_info", async (event: IpcMainEvent) => {
-  console.log("riot_client_info");
-  event.sender.send("riot_client_info", JSON.stringify(await getRiotClientInfo()));
+ipcMain.on("client_info:get", async (event: IpcMainEvent) => {
+  event.sender.send("client_info:get", JSON.stringify(await getRiotClientInfo()));
 });
 
 ipcMain.on("tokens:get", async (event: IpcMainEvent) => {
-  console.log("tokens:get");
   event.sender.send("tokens:get", JSON.stringify(await getTokens()));
 });
 
 ipcMain.on("tokens:refresh", async (event: IpcMainEvent) => {
   event.sender.send("tokens:refresh", JSON.stringify(await getTokens(true)));
+});
+
+ipcMain.on("settings:get", async (event: IpcMainEvent) => {
+  event.sender.send("settings:get", JSON.stringify(await getPreferences()));
 });

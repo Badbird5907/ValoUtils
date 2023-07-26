@@ -18,7 +18,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
                 refreshInterval: 10000
             }}>
                 <DynamicModalProvider>
-                    <div className="flex flex-col h-screen bg-gray-800">
+                    <div className="flex flex-col h-screen bg-gray-800 overflow-x-hidden">
                         <Router routes={[
                             {
                                 title: "Home",

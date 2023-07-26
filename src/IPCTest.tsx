@@ -9,7 +9,7 @@ function IPCTest() {
   useEffect(() => {
     console.log("IPCTest mounted");
     if (window.Main) {
-      window.Main.on("riot_client_info", (message: string) => {
+      window.Main.on("client_info:get", (message: string) => {
         console.log(message);
         showModal({
           title: "Message",
@@ -27,7 +27,7 @@ function IPCTest() {
       });
       return () => {
         console.log("IPCTest unmounted");
-        window.Main.removeAllListeners("riot_client_info");
+        window.Main.removeAllListeners("client_info:get");
       }
     }
   }, []);
@@ -36,7 +36,7 @@ function IPCTest() {
       <h1 className={"text-4xl font-bold text-center mt-4"}>Hello World</h1>
       <CustomButton onPress={() => {
         if (window.Main) {
-          window.Main.send("riot_client_info", "dummy");
+          window.Main.send("client_info:get", "dummy");
           setSent(true);
         }
       }} isLoading={sent}>
