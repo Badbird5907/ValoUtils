@@ -1,6 +1,6 @@
 import fs from "fs";
 import axios, {Method} from "axios";
-import {RiotClientInfo, TokensResponse} from "../../src/types/riot-client";
+import {RiotClientInfo, TokensResponse, UserInfoResponse} from "../../src/types/riot-client";
 import {httpsAgent} from "../../src/util/axios";
 
 // Caching variables
@@ -76,3 +76,7 @@ export const getTokens = async (skipCache = false): Promise<TokensResponse> => {
     cachedTime = Date.now();
     return newAccessToken;
 };
+
+export const getUserInfo = async (): Promise<UserInfoResponse> => {
+    return sendInternalRequest("/riot-client-auth/v1/userinfo", "GET");
+}
