@@ -1,4 +1,4 @@
-import {app, BrowserWindow, clipboard, ipcMain, IpcMainEvent} from 'electron'
+import {app, shell, BrowserWindow, clipboard, ipcMain, IpcMainEvent} from 'electron'
 import path from 'node:path'
 import {getRiotClientInfo, getTokens, getUserInfo} from "./util/riot-client.ts";
 import {initSettingsIpc} from "./modules/profiles";
@@ -38,10 +38,9 @@ function createWindow() {
     })
     win.setMenu(null);
     win?.webContents.openDevTools()
-
-    // Test active push message to Renderer-process.
-    win.webContents.on('did-finish-load', () => {
-        win?.webContents.send('main-process-message', (new Date).toLocaleString())
+    win.webContents.setWindowOpenHandler(({ url }) => {
+        shell.openExternal(url)
+        return { action: 'deny' }
     })
 
     if (VITE_DEV_SERVER_URL) {
@@ -59,6 +58,10 @@ app.on('window-all-closed', () => {
 
 app.whenReady().then(createWindow)
 
+ipcMain.on("open_url", (_: IpcMainEvent, url: string) => {
+    console.log("Opening URL in browser: ", url);
+    shell.openExternal(url);
+});
 
 ipcMain.on("client_info:get", async (event: IpcMainEvent) => {
     event.sender.send("client_info:get", JSON.stringify(await getRiotClientInfo()));
