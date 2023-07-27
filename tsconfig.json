@@ -24,9 +24,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@electron/*": [
-        "./electron/*"
       ]
     }
   },

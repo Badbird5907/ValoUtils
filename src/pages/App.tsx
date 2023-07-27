@@ -1,7 +1,7 @@
 import React from "react";
-import CustomButton from "@/components/button";
-import {getInfo, getSettings, getTokens} from "@/util/riot-client";
-import {RiotClientInfo, TokensResponse} from "@/types/riot-client";
+import CustomButton from "@/components/button.tsx";
+import {getInfo, getSettings, getTokens} from "@/util/riot-client.ts";
+import {RiotClientInfo, TokensResponse} from "@/types/riot-client.ts";
 import {SettingsResponse} from "@/types/settings.ts";
 
 function App() {

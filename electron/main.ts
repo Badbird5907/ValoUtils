@@ -1,7 +1,7 @@
-import {app, BrowserWindow, ipcMain, IpcMainEvent} from 'electron'
+import {app, BrowserWindow, clipboard, ipcMain, IpcMainEvent} from 'electron'
 import path from 'node:path'
 import {getRiotClientInfo, getTokens, getUserInfo} from "./util/riot-client.ts";
-import {getPreferences} from "./util/riot/settings.ts";
+import {initSettingsIpc} from "./modules/profiles";
 
 // The built directory structure
 //
@@ -21,7 +21,7 @@ let win: BrowserWindow | null
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
 const height = 800;
-const width = 800;
+const width = 900;
 
 function createWindow() {
     win = new BrowserWindow({
@@ -37,6 +37,7 @@ function createWindow() {
         },
     })
     win.setMenu(null);
+    win?.webContents.openDevTools()
 
     // Test active push message to Renderer-process.
     win.webContents.on('did-finish-load', () => {
@@ -49,6 +50,7 @@ function createWindow() {
         // win.loadFile('dist/index.html')
         win.loadFile(path.join(process.env.DIST, 'index.html'))
     }
+
 }
 
 app.on('window-all-closed', () => {
@@ -70,9 +72,14 @@ ipcMain.on("tokens:refresh", async (event: IpcMainEvent) => {
     event.sender.send("tokens:refresh", JSON.stringify(await getTokens(true)));
 });
 
-ipcMain.on("settings:get", async (event: IpcMainEvent) => {
-    event.sender.send("settings:get", JSON.stringify(await getPreferences()));
+ipcMain.on("clipboard:get", async (event: IpcMainEvent) => {
+    event.sender.send("clipboard:get", JSON.stringify({
+        text: clipboard.readText(),
+    }));
 });
+
+initSettingsIpc();
+
 
 // spin up a thread that will poll for the client info
 setInterval(async () => {

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import CustomButton from "@/components/button";
-import { useDynamicModal } from "@/components/dynamic-modal";
+import CustomButton from "@/components/button.tsx";
+import { useDynamicModal } from "@/components/dynamic-modal.tsx";
 import { Button as NextUIButton } from "@nextui-org/button";
 
 function IPCTest() {

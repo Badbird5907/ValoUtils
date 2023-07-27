@@ -1,15 +1,16 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import App from './pages/App.tsx'
 import './index.css'
 import {NextUIProvider} from "@nextui-org/react";
 import {DynamicModalProvider} from "./components/dynamic-modal";
-import Router from "@/components/router";
-import {FaFlask, FaHome} from "react-icons/fa";
-import IPCTest from "@/IPCTest";
+import {Router, RouterProvider} from "@/components/router";
+import {FaCogs, FaFlask, FaHome} from "react-icons/fa";
+import IPCTest from "@/pages/IPCTest.tsx";
 import {SWRConfig} from "swr";
 import {fetcher} from "@/util/swr";
 import RiotClientWatcher from "@/components/riot-client-watcher.tsx";
+import SettingsProfiles from "@/pages/SettingsProfiles.tsx";
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
@@ -19,22 +20,33 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
                 refreshInterval: 10000
             }}>
                 <DynamicModalProvider>
-                    <RiotClientWatcher>
-                        <div className="flex flex-col h-screen bg-gray-800 overflow-x-hidden">
-                            <Router routes={[
-                                {
-                                    title: "Home",
-                                    icon: <FaHome/>,
-                                    component: <App/>
-                                },
-                                {
-                                    title: "Testing",
-                                    icon: <FaFlask/>,
-                                    component: <IPCTest/>
-                                }
-                            ]}/>
-                        </div>
-                    </RiotClientWatcher>
+                    <RouterProvider routes={[
+                        {
+                            title: "Home",
+                            id: "home",
+                            icon: <FaHome/>,
+                            component: <App/>
+                        },
+                        {
+                            title: "Testing",
+                            id: "testing",
+                            icon: <FaFlask/>,
+                            component: <IPCTest/>
+                        },
+                        {
+                            title: "Profiles",
+                            id: "profiles",
+                            icon: <FaCogs/>,
+                            component: <SettingsProfiles/>
+                        }
+                    ]}>
+
+                        <RiotClientWatcher>
+                            <div className="flex flex-col h-screen bg-black overflow-x-hidden">
+                                <Router />
+                            </div>
+                        </RiotClientWatcher>
+                    </RouterProvider>
                 </DynamicModalProvider>
             </SWRConfig>
         </NextUIProvider>
