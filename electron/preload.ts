@@ -83,7 +83,7 @@ function useLoading() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #1f2937;
+  background: #000000;
   z-index: 9;
 }
     `
