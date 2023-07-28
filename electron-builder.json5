@@ -3,7 +3,7 @@
  */
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "YourAppID",
+  "appId": "ValoUtils",
   "asar": true,
   "directories": {
     "output": "release/${version}"
@@ -19,6 +19,8 @@
     ]
   },
   "win": {
+    "publish": ["github"],
+    "icon": "public/icon.ico",
     "target": [
       {
         "target": "nsis",

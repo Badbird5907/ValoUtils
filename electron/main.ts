@@ -2,6 +2,8 @@ import {app, shell, BrowserWindow, clipboard, ipcMain, IpcMainEvent} from 'elect
 import path from 'node:path'
 import {getRiotClientInfo, getTokens, getUserInfo} from "./util/riot-client.ts";
 import {initSettingsIpc} from "./modules/profiles";
+import { autoUpdater } from "electron-updater"
+import Store from "./util/store.ts";
 
 // The built directory structure
 //
@@ -23,6 +25,14 @@ const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 const height = 800;
 const width = 900;
 
+const config = new Store({
+    configName: 'config',
+    defaults: {
+        openDevTools: false,
+        autoUpdate: true,
+    }
+})
+
 function createWindow() {
     win = new BrowserWindow({
         width,
@@ -37,7 +47,7 @@ function createWindow() {
         },
     })
     win.setMenu(null);
-    win?.webContents.openDevTools()
+    if (config.get("openDevTools")) win.webContents.openDevTools();
     win.webContents.setWindowOpenHandler(({ url }) => {
         shell.openExternal(url)
         return { action: 'deny' }
@@ -49,18 +59,64 @@ function createWindow() {
         // win.loadFile('dist/index.html')
         win.loadFile(path.join(process.env.DIST, 'index.html'))
     }
-
 }
+const checkUpdate = async () => {
+    if (config.get("autoUpdate")) {
+        await autoUpdater.checkForUpdatesAndNotify();
+    }
+}
+autoUpdater.on('checking-for-update', () => {
+    console.log("Checking for updates...");
+    win?.webContents.send("update:checking");
+    win?.webContents.send("alert:info", "Checking for updates...");
+})
+autoUpdater.on('update-available', (info) => {
+    console.log("Update available, downloading...");
+    win?.webContents.send("update:available", JSON.stringify(info));
+    win?.webContents.send("alert:info", "Update available, downloading...");
+})
+
+autoUpdater.on('update-not-available', (info) => {
+    console.log("Update not available");
+    win?.webContents.send("update:not-available", JSON.stringify(info));
+    win?.webContents.send("alert:info", "No updates available.");
+})
+autoUpdater.on('error', (err) => {
+    console.error("Error while updating: ", err);
+    win?.webContents.send("update:error", err);
+})
+autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = "Download speed: " + progressObj.bytesPerSecond;
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    console.log(log_message);
+    win?.webContents.send("update:download-progress", progressObj);
+})
+autoUpdater.on('update-downloaded', (info) => {
+    console.log("Update downloaded");
+    win?.webContents.send("update:downloaded", JSON.stringify(info));
+    win?.webContents.send("alert:info", "Successfully downloaded update. Restarting...");
+    autoUpdater.quitAndInstall(true, true);
+});
 
 app.on('window-all-closed', () => {
     win = null
+    app.quit(); // SUPER IMPORTANT I HAD 100 PROCESSES RUNNING IN THE BACKGROUND LOL
 })
 
+app.on('ready', async () => {
+    await checkUpdate();
+});
 app.whenReady().then(createWindow)
 
 ipcMain.on("open_url", (_: IpcMainEvent, url: string) => {
     console.log("Opening URL in browser: ", url);
     shell.openExternal(url);
+});
+
+ipcMain.on("version", (event: IpcMainEvent) => {
+    const version = app.getVersion();
+    event.sender.send("version", version);
 });
 
 ipcMain.on("client_info:get", async (event: IpcMainEvent) => {
@@ -81,10 +137,12 @@ ipcMain.on("clipboard:get", async (event: IpcMainEvent) => {
     }));
 });
 
+ipcMain.on("update:check", async () => {
+    await checkUpdate();
+});
+
 initSettingsIpc();
 
-
-// spin up a thread that will poll for the client info
 setInterval(async () => {
     try {
         await getUserInfo();
@@ -92,3 +150,12 @@ setInterval(async () => {
         win?.webContents.send("riot_client:disconnect", (error as any).toString());
     }
 }, 5000)
+if (config.get("autoUpdate")) {
+    setInterval(async () => {
+        try {
+            await checkUpdate();
+        } catch (error) {
+            console.error("Error while checking for updates: ", error);
+        }
+    }, 1000 * 60 * 60) // auto check for updates every hour
+}

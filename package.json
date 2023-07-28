@@ -2,20 +2,24 @@
   "name": "valoutils",
   "version": "0.0.1",
   "author": "Badbird5907",
+  "description": "A app that provides extra tools for Valorant",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
+    "release": "tsc && vite build && electron-builder -p always",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
     "@nextui-org/react": "^0.0.0-dev-v2-20230725153517",
     "axios": "^1.4.0",
+    "electron-updater": "^6.1.1",
     "framer-motion": "^10.13.1",
     "moment": "^2.29.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.10.1",
+    "react-simple-snackbar": "^1.1.11",
     "swr": "^2.2.0"
   },
   "devDependencies": {
