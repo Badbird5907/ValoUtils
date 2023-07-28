@@ -3,6 +3,7 @@ import path from 'node:path'
 import {getRiotClientInfo, getTokens, getUserInfo} from "./util/riot-client.ts";
 import {initSettingsIpc} from "./modules/profiles";
 import { autoUpdater } from "electron-updater"
+import { initialize, trackEvent } from "@aptabase/electron/main";
 import Store from "./util/store.ts";
 
 // The built directory structure
@@ -17,6 +18,7 @@ import Store from "./util/store.ts";
 process.env.DIST = path.join(__dirname, '../dist')
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
 
+initialize("A-EU-6030398946");
 
 let win: BrowserWindow | null
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
@@ -74,6 +76,7 @@ autoUpdater.on('update-available', (info) => {
     console.log("Update available, downloading...");
     win?.webContents.send("update:available", JSON.stringify(info));
     win?.webContents.send("alert:info", "Update available, downloading...");
+    trackEvent("update_downloading");
 })
 
 autoUpdater.on('update-not-available', (info) => {
@@ -111,6 +114,7 @@ app.whenReady().then(createWindow)
 
 ipcMain.on("open_url", (_: IpcMainEvent, url: string) => {
     console.log("Opening URL in browser: ", url);
+    trackEvent("open_url", {url: url});
     shell.openExternal(url);
 });
 
@@ -137,16 +141,24 @@ ipcMain.on("clipboard:get", async (event: IpcMainEvent) => {
     }));
 });
 
+ipcMain.on("analytics:track", async (_: IpcMainEvent, event: string, data: string) => {
+    trackEvent(event, JSON.parse(data));
+});
+
 ipcMain.on("update:check", async () => {
     await checkUpdate();
 });
 
 initSettingsIpc();
-
+let firstDisconnect = false;
 setInterval(async () => {
     try {
         await getUserInfo();
     } catch (error) {
+        if (firstDisconnect) {
+            trackEvent("riot_client_disconnect", {error: (error as any).toString()});
+            firstDisconnect = true;
+        }
         win?.webContents.send("riot_client:disconnect", (error as any).toString());
     }
 }, 5000)

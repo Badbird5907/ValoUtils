@@ -28,6 +28,7 @@ const SettingsProfiles = () => {
                 <h1 className={"text-4xl font-bold"}>Profiles</h1>
                 <CustomButton onClickLoading={() => {
                     return new Promise<void>((resolve_1, reject_1) => {
+                        window.Main.send("analytics:track", "profile:add", "{}");
                         showModal({
                             title: "Add Profile",
                             body: (
@@ -37,6 +38,7 @@ const SettingsProfiles = () => {
                                     <CustomButton onClickLoading={() => {
                                         return new Promise<void>((resolve, reject) => {
                                             if (window.Main) {
+                                                window.Main.send("analytics:track", "profile:add:load_account", "{}");
                                                 window.Main.on("settings:profile:add", (message: string) => {
                                                     const rawData = JSON.parse(message);
                                                     if (rawData.error) {
@@ -58,6 +60,7 @@ const SettingsProfiles = () => {
                                     <CustomButton onClickLoading={() => {
                                         return new Promise<void>(async (resolve, reject) => {
                                             if (window.Main) {
+                                                window.Main.send("analytics:track", "profile:add:load_clipboard", "{}");
                                                 const clipboardData = await getClipboard();
                                                 if (!clipboardData) {
                                                     reject("Clipboard is empty");
@@ -77,7 +80,12 @@ const SettingsProfiles = () => {
                                                     });
                                                     window.Main.send("settings:profile:add", "clipboard");
                                                 }
-                                                if (clipboardData.length < 2500 || !clipboardData.match(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/)) { // if it's not base64 or it's too short to be a profile
+                                                const match = !clipboardData.match(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/);
+                                                if (clipboardData.length < 2500 || match) { // if it's not base64 or it's too short to be a profile
+                                                    window.Main.send("analytics:track", "profile:add:load_clipboard:error", JSON.stringify({
+                                                        length: clipboardData.length,
+                                                        match
+                                                    }));
                                                     showModal({
                                                         title: "This doesn't look like a profile",
                                                         body: "This doesn't look like a profile! Are you sure you want to continue?",
@@ -141,6 +149,7 @@ const SettingsProfiles = () => {
                                 <CustomButton className={"mr-4"} onClickLoading={() => {
                                     return new Promise<void>((resolve, reject) => {
                                         if (window.Main) {
+                                            window.Main.send("analytics:track", "profile:load", "{}");
                                             window.Main.on("settings:profile:load", (message: string) => {
                                                 const rawData = JSON.parse(message);
                                                 if (rawData.error) {
@@ -176,6 +185,7 @@ const SettingsProfiles = () => {
                                                                   }}>Cancel</CustomButton>
                                                     <CustomButton onPress={() => {
                                                         if (window.Main) {
+                                                            window.Main.send("analytics:track", "profile:edit", "{}");
                                                             window.Main.on("settings:profile:rename", (message: string) => {
                                                                 const rawData = JSON.parse(message);
                                                                 if (!rawData.success) {
@@ -215,6 +225,7 @@ const SettingsProfiles = () => {
                                 <CustomButton className={"ml-4"} color={"danger"} onClickLoading={() => {
                                     return new Promise<void>((resolve, reject) => {
                                         if (window.Main) {
+                                            window.Main.send("analytics:track", "profile:remove", "{}");
                                             window.Main.on("settings:profile:remove", (message: string) => {
                                                 const rawData = JSON.parse(message);
                                                 if (rawData.error) {

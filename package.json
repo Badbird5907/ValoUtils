@@ -1,6 +1,6 @@
 {
   "name": "valoutils",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Badbird5907",
   "description": "A app that provides extra tools for Valorant",
   "scripts": {
@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aptabase/electron": "^0.2.2",
     "@nextui-org/react": "^0.0.0-dev-v2-20230725153517",
     "axios": "^1.4.0",
     "electron-updater": "^6.1.1",

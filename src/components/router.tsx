@@ -6,7 +6,7 @@ type RouterProps = {
     routes: Route[];
 }
 // Create a context to store the routes
-const RouterContext = createContext<RouterProps>({ routes: [] });
+const RouterContext = createContext<RouterProps>({routes: []});
 // Custom hook to use the router context
 const useRouter = () => {
     const routerContext = useContext(RouterContext);
@@ -42,21 +42,21 @@ const useRouter = () => {
         }
     }
 
-    return { selected, body, goTo, goToIndex };
+    return {selected, body, goTo, goToIndex};
 };
 const RouterProvider: React.FC<RouterProps & {
     children: React.ReactNode | React.ReactNode[];
-}> = ({ routes, children }) => {
+}> = ({routes, children}) => {
     return (
-        <RouterContext.Provider value={{ routes }}>
+        <RouterContext.Provider value={{routes}}>
             {children}
         </RouterContext.Provider>
     );
 };
 
 const Router = () => {
-    const { routes } = useContext(RouterContext);
-    const { selected, body, goTo } = useRouter();
+    const {routes} = useContext(RouterContext);
+    const {selected, body, goTo} = useRouter();
 
     return (
         <>
@@ -74,6 +74,9 @@ const Router = () => {
                     selected={selected} // Use selected directly to set initial tab selection
                     onSelectionChange={(key: Key) => {
                         goTo(routes[key as number].id); // Use the goTo function to change the selected tab
+                        window.Main.send("analytics:track", "tab_change", JSON.stringify({
+                            tab: routes[key as number].id
+                        }));
                     }}
                 >
                     {routes.map((route, index) => (
@@ -94,4 +97,4 @@ const Router = () => {
     );
 };
 
-export { Router, RouterProvider, useRouter };
+export {Router, RouterProvider, useRouter};
