@@ -18,7 +18,7 @@ import Store from "./util/store.ts";
 process.env.DIST = path.join(__dirname, '../dist')
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
 
-initialize("A-EU-6030398946");
+initialize("A-US-1888737338");
 
 let win: BrowserWindow | null
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
