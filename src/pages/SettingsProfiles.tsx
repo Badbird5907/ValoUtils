@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import CustomButton from "@/components/button.tsx";
 import formatUnixMillis from "@/util/format-date.ts";
 import {useDynamicModal} from "@/components/dynamic-modal.tsx";
-import {FaTrash} from "react-icons/fa6";
+import {FaPlus, FaTrash} from "react-icons/fa6";
 import {FaEdit} from "react-icons/fa";
 import getClipboard from "@/util/clipboard.ts";
 
@@ -121,7 +121,7 @@ const SettingsProfiles = () => {
                             }
                         });
                     });
-                }}>Add</CustomButton>
+                }}><FaPlus/>Add</CustomButton>
             </div>
             <p className={"text-center text-gray-400 pb-4"}>Make sure you have the game <b
                 className={"text-bold"}>CLOSED</b>, and Riot Client should be open.</p>
