@@ -140,6 +140,12 @@ ipcMain.on("clipboard:get", async (event: IpcMainEvent) => {
         text: clipboard.readText(),
     }));
 });
+ipcMain.on("clipboard:set", async (event: IpcMainEvent, text: string) => {
+    clipboard.writeText(text);
+    event.sender.send("clipboard:set", JSON.stringify({
+        text: clipboard.readText(),
+    }));
+});
 
 ipcMain.on("analytics:track", async (_: IpcMainEvent, event: string, data: string) => {
     trackEvent(event, JSON.parse(data));

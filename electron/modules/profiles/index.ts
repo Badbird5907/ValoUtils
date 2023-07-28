@@ -2,6 +2,7 @@ import Store from "../../util/store.ts";
 import {Profile} from "@/types/profile.ts";
 import {clipboard, ipcMain, IpcMainEvent} from "electron";
 import {getPreferences, loadSettings} from "../../util/riot/settings.ts";
+import {saveData} from "../../util/share.ts";
 
 const dataStore = new Store({
     configName: 'profiles',
@@ -129,6 +130,22 @@ export const initSettingsIpc = () => {
         }
         await loadSettings(profile);
         event.sender.send("settings:profile:load", JSON.stringify({
+            success: true
+        }));
+    });
+    ipcMain.on("settings:profile:share", async (event: IpcMainEvent, profileName: string) => {
+        const profile = getProfiles().find((p) => p.name === profileName);
+        if (!profile) {
+            event.sender.send("settings:profile:share", JSON.stringify({
+                error: "Profile not found",
+                success: false
+            }));
+            return;
+        }
+        const { data } = profile;
+        const id = await saveData(data);
+        event.sender.send("settings:profile:share", JSON.stringify({
+            code: id,
             success: true
         }));
     });

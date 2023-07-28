@@ -4,9 +4,9 @@ import {useEffect, useState} from "react";
 import CustomButton from "@/components/button.tsx";
 import formatUnixMillis from "@/util/format-date.ts";
 import {useDynamicModal} from "@/components/dynamic-modal.tsx";
-import {FaPlus, FaTrash} from "react-icons/fa6";
+import {FaPlus, FaShare, FaTrash} from "react-icons/fa6";
 import {FaEdit} from "react-icons/fa";
-import getClipboard from "@/util/clipboard.ts";
+import {getData} from "../../electron/util/share.ts";
 
 const SettingsProfiles = () => {
     const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -57,64 +57,83 @@ const SettingsProfiles = () => {
                                             }
                                         });
                                     }}>Load from account</CustomButton>
-                                    <CustomButton onClickLoading={() => {
-                                        return new Promise<void>(async (resolve, reject) => {
-                                            if (window.Main) {
-                                                window.Main.send("analytics:track", "profile:add:load_clipboard", "{}");
-                                                const clipboardData = await getClipboard();
-                                                if (!clipboardData) {
-                                                    reject("Clipboard is empty");
-                                                }
-                                                const save = () => {
-                                                    window.Main.on("settings:profile:add", (message: string) => {
-                                                        const rawData = JSON.parse(message);
-                                                        if (rawData.error) {
-                                                            reject(rawData.error);
-                                                            reject_1();
+                                    <div className={"flex-row flex h-full"}>
+                                        <Input className={"w-4/5"} label={"Share Code"} id={"share-code"}/>
+                                        <CustomButton className={"h-full w-fit ml-4 " +
+                                            "py-5" // TODO figure out why the height isn't working
+                                        } onClickLoading={() => {
+                                            return new Promise<void>(async (resolve, reject) => {
+                                                    if (window.Main) {
+                                                        window.Main.send("analytics:track", "profile:add:load_share", "{}");
+                                                        const input = window.document.getElementById("share-code") as HTMLInputElement;
+                                                        const inputData = input.value;
+                                                        if (!inputData) {
+                                                            reject("No input data");
                                                             return;
                                                         }
-                                                        resolve();
-                                                        closeModal();
-                                                        resolve_1();
-                                                        window.Main.removeAllListeners("settings:profile:add");
-                                                    });
-                                                    window.Main.send("settings:profile:add", "clipboard");
-                                                }
-                                                const match = !clipboardData.match(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/);
-                                                if (clipboardData.length < 2500 || match) { // if it's not base64 or it's too short to be a profile
-                                                    window.Main.send("analytics:track", "profile:add:load_clipboard:error", JSON.stringify({
-                                                        length: clipboardData.length,
-                                                        match
-                                                    }));
-                                                    showModal({
-                                                        title: "This doesn't look like a profile",
-                                                        body: "This doesn't look like a profile! Are you sure you want to continue?",
-                                                        footer: (
-                                                            <>
-                                                                <CustomButton className={"mr-4"} color={"danger"}
-                                                                              onPress={() => {
-                                                                                  closeModal();
-                                                                                  reject();
-                                                                                  reject_1();
-                                                                              }}>Cancel</CustomButton>
-                                                                <CustomButton onPress={() => {
-                                                                    save();
-                                                                }}>Continue</CustomButton>
-                                                            </>
-                                                        ),
-                                                        onClose: () => {
-                                                            reject();
-                                                            reject_1();
+                                                        if (inputData.length != 10) {
+                                                            reject("Invalid share code");
+                                                            return;
                                                         }
-                                                    });
-                                                } else {
-                                                    save();
+                                                        const data = await getData(inputData);
+                                                        if (!data) {
+                                                            reject("Invalid data returned by server");
+                                                        }
+                                                        const save = () => {
+                                                            window.Main.on("settings:profile:add", (message: string) => {
+                                                                const rawData = JSON.parse(message);
+                                                                if (rawData.error) {
+                                                                    reject(rawData.error);
+                                                                    reject_1();
+                                                                    return;
+                                                                }
+                                                                resolve();
+                                                                closeModal();
+                                                                resolve_1();
+                                                                window.Main.removeAllListeners("settings:profile:add");
+                                                            });
+                                                            window.Main.send("settings:profile:add", "clipboard");
+                                                        }
+                                                        const match = !data.match(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/);
+                                                        if (data.length < 2500 || match) { // if it's not base64 or it's too short to be a profile
+                                                            window.Main.send("analytics:track", "profile:add:load_clipboard:error", JSON.stringify({
+                                                                length: data.length,
+                                                                match
+                                                            }));
+                                                            showModal({
+                                                                title: "This doesn't look like a profile",
+                                                                body: "This doesn't look like a profile! Are you sure you want to continue?",
+                                                                footer: (
+                                                                    <>
+                                                                        <CustomButton className={"mr-4"}
+                                                                                      color={"danger"}
+                                                                                      onPress={() => {
+                                                                                          closeModal();
+                                                                                          reject();
+                                                                                          reject_1();
+                                                                                      }}>Cancel</CustomButton>
+                                                                        <CustomButton onPress={() => {
+                                                                            save();
+                                                                        }}>Continue</CustomButton>
+                                                                    </>
+                                                                ),
+                                                                onClose: () => {
+                                                                    reject();
+                                                                    reject_1();
+                                                                }
+                                                            });
+                                                        } else {
+                                                            save();
+                                                        }
+                                                    } else {
+                                                        reject("No window.Main");
+                                                    }
                                                 }
-                                            } else {
-                                                reject("No window.Main");
-                                            }
-                                        });
-                                    }}>Load from clipboard</CustomButton>
+                                            )
+                                                ;
+                                        }
+                                        }><FaPlus/></CustomButton>
+                                    </div>
                                 </div>
                             ),
                             footer: (
@@ -167,7 +186,7 @@ const SettingsProfiles = () => {
                                 }}>
                                     Load
                                 </CustomButton>
-                                <CustomButton onClickLoading={() => {
+                                <CustomButton className={"mr-4"} onClickLoading={() => {
                                     return new Promise<void>((resolve, reject) => {
                                         showModal({
                                             title: "Edit Profile",
@@ -222,7 +241,62 @@ const SettingsProfiles = () => {
                                 }}>
                                     <FaEdit/>
                                 </CustomButton>
-                                <CustomButton className={"ml-4"} color={"danger"} onClickLoading={() => {
+                                <CustomButton className={"mr-4"} onClickLoading={() => {
+                                    return new Promise<void>((resolve, reject) => {
+                                        if (window.Main) {
+                                            window.Main.send("analytics:track", "profile:share", "{}");
+                                            window.Main.on("settings:profile:share", (message: string) => {
+                                                const rawData = JSON.parse(message);
+                                                if (rawData.error) {
+                                                    reject(rawData.error);
+                                                    return;
+                                                }
+                                                showModal({
+                                                    title: "Share Profile",
+                                                    body: (
+                                                        <div className={"pt-4"}>
+                                                            <Input label={"Share Code"} defaultValue={rawData.code}
+                                                                   labelPlacement={"outside"}
+                                                                   isReadOnly
+                                                            />
+                                                            <span className={"text-gray-400"}>The share code will expire in 90 days.</span>
+                                                        </div>
+                                                    ),
+                                                    footer: (
+                                                        <>
+                                                            <CustomButton className={"w-full"}
+                                                                          onClickLoading={() => {
+                                                                              return new Promise<void>((resolve, reject) => {
+                                                                                  if (window.Main) {
+                                                                                      window.Main.send("analytics:track", "profile:share:copy", "{}");
+                                                                                      window.Main.send("clipboard:set", rawData.code);
+                                                                                      resolve();
+                                                                                  } else {
+                                                                                      reject("No window.Main");
+                                                                                  }
+                                                                              });
+                                                                          }}
+                                                            >Copy</CustomButton>
+                                                            <CustomButton className={"w-full"} color={"danger"}
+                                                                          onPress={() => {
+                                                                              closeModal();
+                                                                              resolve();
+                                                                          }}>Close</CustomButton>
+                                                        </>
+                                                    ),
+                                                });
+                                                resolve();
+                                                window.Main.removeAllListeners("settings:profile:share");
+                                            });
+                                            window.Main.send("settings:profile:share", profile.name);
+                                        } else {
+                                            reject("No window.Main");
+                                        }
+                                    });
+                                }}>
+                                    <FaShare/>
+                                </CustomButton>
+                                <CustomButton className={""} color={"danger"} onClickLoading={() => {
                                     return new Promise<void>((resolve, reject) => {
                                         if (window.Main) {
                                             window.Main.send("analytics:track", "profile:remove", "{}");
